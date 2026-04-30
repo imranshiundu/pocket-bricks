@@ -10,11 +10,39 @@ It is intentionally lightweight. No backend. No tracking. No copied assets. It r
 
 > Legal note: this is an original open-source implementation inspired by classic monochrome mobile puzzle games. It does not include proprietary Nokia assets, proprietary Tetris assets, ROMs, official logos, official sounds, or copied game code. The public name is **Pocket Bricks** to keep the repository safe for open-source use.
 
-## Android APK
+## Install on Android
 
 Pocket Bricks is packaged as a real Android app with Capacitor.
 
-The **Build Android APK** workflow is intentionally manual/tag-based now. Normal pushes to `main` no longer run the APK job, so GitHub should stop sending failed build emails on every code push.
+The best public install path is GitHub Releases:
+
+1. Open this repository on your phone.
+2. Tap **Releases**.
+3. Download `pocket-bricks-debug.apk` from the newest release.
+4. Tap the APK.
+5. Allow **Install unknown apps** when Android asks.
+6. Launch **Pocket Bricks** from the app drawer.
+
+No Play Store is required.
+
+Full install guide: [INSTALL.md](./INSTALL.md)
+
+### Install from Termux
+
+```bash
+pkg update -y
+pkg install -y git curl termux-api
+termux-setup-storage
+git clone https://github.com/imranshiundu/pocket-bricks.git
+cd pocket-bricks
+bash scripts/install-android-termux.sh
+```
+
+The Termux script downloads the APK from the `android-latest` GitHub Release and opens Android's installer. If Android blocks the install, allow installs from Termux or your file manager, then tap the APK again.
+
+### Maintainer APK publishing
+
+The **Build Android APK** workflow is manual/tag-based. Normal pushes to `main` no longer run the APK job, so GitHub should stop sending failed build emails on every code push.
 
 When the workflow passes, GitHub uploads an installable debug APK artifact named:
 
@@ -22,22 +50,17 @@ When the workflow passes, GitHub uploads an installable debug APK artifact named
 pocket-bricks-debug-apk
 ```
 
-### Install on Android without Play Store
-
-1. Open the repository on your phone.
-2. Go to **Actions**.
-3. Run or open the latest successful **Build Android APK** workflow.
-4. Download the `pocket-bricks-debug-apk` artifact.
-5. Extract it if Android downloads it as a ZIP.
-6. Tap `pocket-bricks-debug.apk`.
-7. Allow **Install unknown apps** for the browser or file manager when Android asks.
-8. Launch **Pocket Bricks** from the app drawer.
-
 For public testers, push a version tag such as `v1.1.1`. The workflow will build the APK and attach it to a GitHub Release automatically.
+
+For the easiest public install and Termux path, also keep a release named `android-latest` with the APK asset named:
+
+```text
+pocket-bricks-debug.apk
+```
 
 ## Updates
 
-GitHub does not provide a public WebSocket channel that can safely push release updates directly to an APK. Pocket Bricks uses the safer open-source method:
+GitHub does not provide a simple public WebSocket channel that can safely push release updates directly to an APK. Pocket Bricks uses the safer open-source method:
 
 - The installed app checks the latest GitHub Release occasionally.
 - If the release tag is newer than the installed app version, it shows **GET UPDATE** inside the game.
@@ -57,6 +80,7 @@ The Pages workflow is manual-only to stop failed deploy emails from arriving on 
 ## What it delivers
 
 - Real Android APK build workflow.
+- Simple Termux installer script for Android users.
 - Classic 10 x 20 falling-block board.
 - Seven familiar block shapes.
 - Memoryless old-phone style piece selection instead of a modern 7-bag feel.
@@ -139,7 +163,7 @@ android/app/build/outputs/apk/debug/app-debug.apk
 ├── assets/                  # Original icon and visual assets
 ├── docs/                    # Architecture, gameplay, and testing docs
 ├── native/                  # Native Android build notes
-├── scripts/                 # Build helper scripts
+├── scripts/                 # Build helper scripts and Termux installer
 ├── src/
 │   ├── app.js               # Canvas, controls, local memory, sound, native hooks, update checker
 │   ├── game.js              # Pure game engine: board, movement, scoring, collisions
