@@ -6,9 +6,31 @@
 
 Pocket Bricks is an open-source, smartphone-first falling-block puzzle game built to feel like the clean monochrome games people remember from old button phones: small LCD-style screen, simple controls, no clutter, fast restarts, and a focused score chase.
 
-It is intentionally lightweight. No backend. No tracking. No copied assets. It runs as a real Android APK, and the same codebase can still run as a static web demo.
+It is intentionally lightweight. No backend. No tracking. No copied assets. It runs as a real Android APK, and the same codebase can also run as a static web app on Vercel.
 
 > Legal note: this is an original open-source implementation inspired by classic monochrome mobile puzzle games. It does not include proprietary Nokia assets, proprietary Tetris assets, ROMs, official logos, official sounds, or copied game code. The public name is **Pocket Bricks** to keep the repository safe for open-source use.
+
+## Live web hosting on Vercel
+
+This repo is ready for Vercel.
+
+### One-time Vercel setup
+
+1. Go to Vercel.
+2. Import `imranshiundu/pocket-bricks`.
+3. Keep the framework as **Other** or **Static**.
+4. Vercel should read `vercel.json` automatically.
+5. Use these values if Vercel asks:
+
+```text
+Install Command: npm install
+Build Command: npm run build
+Output Directory: dist
+```
+
+After that, every push to `main` deploys the hosted game.
+
+The hosted version is still the same game experience: LCD screen, old-phone buttons, local score memory, offline cache, and install prompt where the browser supports it.
 
 ## Install on Android
 
@@ -44,19 +66,14 @@ The Termux script downloads the APK from the `android-latest` GitHub Release and
 
 The **Build Android APK** workflow is manual/tag-based. Normal pushes to `main` no longer run the APK job, so GitHub should stop sending failed build emails on every code push.
 
-When the workflow passes, GitHub uploads an installable debug APK artifact named:
+To publish the easiest public APK:
 
-```text
-pocket-bricks-debug-apk
-```
+1. Open **Actions**.
+2. Run **Build Android APK** manually.
+3. Keep `publish_latest` enabled.
+4. When it passes, GitHub creates/updates the `android-latest` release with `pocket-bricks-debug.apk`.
 
-For public testers, push a version tag such as `v1.1.1`. The workflow will build the APK and attach it to a GitHub Release automatically.
-
-For the easiest public install and Termux path, also keep a release named `android-latest` with the APK asset named:
-
-```text
-pocket-bricks-debug.apk
-```
+For a versioned release, push a version tag such as `v1.1.2`. The workflow will build the APK and attach it to a GitHub Release automatically.
 
 ## Updates
 
@@ -67,18 +84,9 @@ GitHub does not provide a simple public WebSocket channel that can safely push r
 - The button opens the GitHub Releases page.
 - No tracking server, no forced updates, no Play Store dependency.
 
-## Web demo
-
-The web demo can still be deployed manually with the GitHub Pages workflow:
-
-```text
-https://imranshiundu.github.io/pocket-bricks/
-```
-
-The Pages workflow is manual-only to stop failed deploy emails from arriving on every normal code push.
-
 ## What it delivers
 
+- Vercel-ready static app configuration.
 - Real Android APK build workflow.
 - Simple Termux installer script for Android users.
 - Classic 10 x 20 falling-block board.
@@ -139,6 +147,20 @@ Then open:
 http://localhost:4173
 ```
 
+## Build web output locally
+
+```bash
+npm install
+npm run build
+npm run preview
+```
+
+The static Vercel output is created in:
+
+```text
+dist/
+```
+
 ## Build APK locally
 
 ```bash
@@ -171,8 +193,9 @@ android/app/build/outputs/apk/debug/app-debug.apk
 ├── tests/                   # Node test suite for the game engine
 ├── capacitor.config.json    # Native app configuration
 ├── index.html               # App entry
-├── manifest.webmanifest     # Web demo install metadata
-├── sw.js                    # Offline cache for web demo
+├── manifest.webmanifest     # Web install metadata
+├── sw.js                    # Offline cache for hosted web app
+├── vercel.json              # Vercel static deployment configuration
 └── package.json             # Scripts and metadata
 ```
 
@@ -189,9 +212,10 @@ This separation keeps the project easy for open-source contributors to understan
 
 ```bash
 npm test
+npm run check
 ```
 
-The current suite checks board dimensions, rotation, wall collision, line clearing, score application, hard drop, and pause behavior.
+The current suite checks board dimensions, rotation, wall collision, line clearing, score application, hard drop, and pause behavior. `npm run check` also verifies that the Vercel static output builds.
 
 ## Open-source standards
 
