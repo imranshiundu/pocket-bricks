@@ -1,0 +1,13 @@
+{
+  "appId": "dev.imran.pocketbricks",
+  "appName": "Pocket Bricks",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
