@@ -12,9 +12,11 @@ It is intentionally lightweight. No backend. No tracking. No copied assets. It r
 
 ## Android APK
 
-Pocket Bricks is now packaged as a real Android app with Capacitor.
+Pocket Bricks is packaged as a real Android app with Capacitor.
 
-Every push to `main` runs the **Build Android APK** workflow. When it passes, GitHub uploads an installable debug APK artifact named:
+The **Build Android APK** workflow is intentionally manual/tag-based now. Normal pushes to `main` no longer run the APK job, so GitHub should stop sending failed build emails on every code push.
+
+When the workflow passes, GitHub uploads an installable debug APK artifact named:
 
 ```text
 pocket-bricks-debug-apk
@@ -24,14 +26,14 @@ pocket-bricks-debug-apk
 
 1. Open the repository on your phone.
 2. Go to **Actions**.
-3. Open the latest successful **Build Android APK** run.
+3. Run or open the latest successful **Build Android APK** workflow.
 4. Download the `pocket-bricks-debug-apk` artifact.
 5. Extract it if Android downloads it as a ZIP.
 6. Tap `pocket-bricks-debug.apk`.
 7. Allow **Install unknown apps** for the browser or file manager when Android asks.
 8. Launch **Pocket Bricks** from the app drawer.
 
-For public testers, publish a GitHub Release and attach the APK there. The app checks the latest GitHub Release and shows a small update notice when a newer APK exists.
+For public testers, push a version tag such as `v1.1.1`. The workflow will build the APK and attach it to a GitHub Release automatically.
 
 ## Updates
 
@@ -117,6 +119,7 @@ http://localhost:4173
 
 ```bash
 npm install
+npm run build:android-web
 npx cap add android
 npm run sync:android
 cd android
@@ -136,6 +139,7 @@ android/app/build/outputs/apk/debug/app-debug.apk
 ├── assets/                  # Original icon and visual assets
 ├── docs/                    # Architecture, gameplay, and testing docs
 ├── native/                  # Native Android build notes
+├── scripts/                 # Build helper scripts
 ├── src/
 │   ├── app.js               # Canvas, controls, local memory, sound, native hooks, update checker
 │   ├── game.js              # Pure game engine: board, movement, scoring, collisions
