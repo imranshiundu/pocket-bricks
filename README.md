@@ -4,7 +4,7 @@
   <img src="./assets/screenshot.svg" alt="Pocket Bricks monochrome game screen and touch controls" width="420" />
 </p>
 
-Pocket Bricks is an open-source, smartphone-first falling-block puzzle game built to feel like the clean monochrome games people remember from old button phones: small LCD-style screen, simple controls, no clutter, fast restarts, local memory, button taps, and square-wave game sounds.
+Pocket Bricks is an open-source, smartphone-first falling-block puzzle game built to feel like the clean monochrome games people remember from old button phones: small LCD-style screen, simple controls, no clutter, fast restarts, local memory, button taps, square-wave game sounds, and a faint landing guide that helps the player place blocks without turning the game into a modern arcade clone.
 
 It is intentionally lightweight. No backend. No tracking. No copied assets. It runs as a real Android APK, and the same codebase can also run as a static web app on Vercel.
 
@@ -30,7 +30,7 @@ Output Directory: dist
 
 After that, every push to `main` deploys the hosted game.
 
-The hosted version is still the same game experience: LCD screen, old-phone buttons, local score memory, offline cache, settings, and install prompt where the browser supports it.
+The hosted version is still the same game experience: LCD screen, old-phone buttons, local score memory, offline cache, settings, update checks, and install prompt where the browser supports it.
 
 ## Install on Android
 
@@ -86,7 +86,7 @@ GitHub does not provide a simple public WebSocket channel that can safely push r
 
 ## Sound
 
-Pocket Bricks now has generated old-phone-style sound using Web Audio square waves. There are no copied Nokia files. The game generates short beeps for start, move, rotate, soft drop, hard drop, piece lock, line clear, pause, and game over.
+Pocket Bricks has generated old-phone-style sound using Web Audio square waves. There are no copied Nokia files. The game generates short beeps for start, move, rotate, soft drop, hard drop, piece lock, line clear, pause, and game over.
 
 On phones, sound only starts after the player taps a button because Android and mobile browsers block audio until user interaction. Tap **SOUND ON**, **START**, or any control once, then the beeps should play.
 
@@ -99,6 +99,7 @@ On phones, sound only starts after the player taps a button because Android and 
 - Seven familiar block shapes.
 - Memoryless old-phone style piece selection instead of a modern 7-bag feel.
 - Simple wall-kick rotation that feels forgiving without becoming modern/arcade-heavy.
+- Faint ghost projection showing where the current block will land.
 - Classic scoring table: single, double, triple, four-line clear.
 - Smartphone keypad with left, right, down, rotate, and drop.
 - Keyboard support for desktop testing.
@@ -109,6 +110,10 @@ On phones, sound only starts after the player taps a button because Android and 
 - Native haptic taps where supported.
 - In-app GitHub release update notice.
 - Core game logic separated from rendering and covered by tests.
+
+## Gameplay details
+
+The ghost projection is deliberately subtle. It is drawn as an outline only, using the same LCD palette, so it helps on small smartphone screens without making the game feel over-designed. It is calculated inside the pure game engine through `getGhostPiece()` and exposed in `snapshot()` as `ghost` and `ghostCells`, which means it can be tested without touching the DOM.
 
 ## Interface rule
 
@@ -198,7 +203,7 @@ android/app/build/outputs/apk/debug/app-debug.apk
 ├── scripts/                 # Build helper scripts and Termux installer
 ├── src/
 │   ├── app.js               # Canvas, controls, local memory, sound, native hooks, update checker
-│   ├── game.js              # Pure game engine: board, movement, scoring, collisions
+│   ├── game.js              # Pure game engine: board, movement, scoring, ghost piece, collisions
 │   └── styles.css           # Monochrome LCD screen and mobile keypad UI
 ├── tests/                   # Node test suite for the game engine
 ├── capacitor.config.json    # Native app configuration
@@ -213,7 +218,7 @@ android/app/build/outputs/apk/debug/app-debug.apk
 
 The game has two layers:
 
-1. **Game engine** — `src/game.js` is pure JavaScript. It knows nothing about the DOM. This makes movement, rotation, collision, line clearing, scoring, and level progression testable.
+1. **Game engine** — `src/game.js` is pure JavaScript. It knows nothing about the DOM. This makes movement, rotation, collision, ghost projection, line clearing, scoring, and level progression testable.
 2. **App shell** — `src/app.js` handles canvas drawing, touch controls, keyboard controls, local memory, sound, native haptics, settings, release update checks, and web install prompts.
 
 This separation keeps the project easy for open-source contributors to understand.
@@ -225,7 +230,7 @@ npm test
 npm run check
 ```
 
-The current suite checks board dimensions, rotation, wall collision, line clearing, score application, hard drop, and pause behavior. `npm run check` also verifies that the Vercel static output builds.
+The current suite checks board dimensions, rotation, wall collision, line clearing, score application, hard drop, pause behavior, and ghost projection behavior. `npm run check` also verifies that the Vercel static output builds.
 
 ## Open-source standards
 
