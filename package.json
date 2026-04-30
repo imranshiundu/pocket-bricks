@@ -1,24 +1,27 @@
 {
   "name": "pocket-bricks",
-  "version": "1.0.0",
-  "description": "Open-source Nokia-style falling-block puzzle game rebuilt for smartphones.",
+  "version": "1.1.0",
+  "description": "Open-source old-phone-style falling-block puzzle game rebuilt as a real smartphone APK.",
   "type": "module",
   "private": false,
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "serve": "python3 -m http.server 4173",
+    "sync:android": "npx cap sync android",
+    "open:android": "npx cap open android",
     "check": "npm test"
   },
-  "keywords": [
-    "game",
-    "pwa",
-    "mobile",
-    "falling-blocks",
-    "retro",
-    "open-source"
-  ],
+  "dependencies": {
+    "@capacitor/android": "^7.0.1",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/browser": "^7.0.0",
+    "@capacitor/core": "^7.0.1",
+    "@capacitor/haptics": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.1"
+  },
+  "keywords": ["game", "apk", "android", "mobile", "falling-blocks", "retro", "open-source"],
   "license": "MIT",
-  "engines": {
-    "node": ">=20"
-  }
+  "engines": { "node": ">=20" }
 }
