@@ -1,7 +1,7 @@
 {
   "appId": "dev.imran.pocketbricks",
   "appName": "Pocket Bricks",
-  "webDir": ".",
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
   },
