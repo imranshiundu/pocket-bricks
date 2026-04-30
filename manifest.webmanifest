@@ -1,0 +1,27 @@
+{
+  "name": "Pocket Bricks",
+  "short_name": "Bricks",
+  "description": "An open-source old-phone-style falling-block puzzle game rebuilt for smartphones.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./assets/screenshot.svg",
+      "sizes": "1080x1600",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Pocket Bricks smartphone game screen"
+    }
+  ]
+}
