@@ -6,100 +6,97 @@
 
 Pocket Bricks is an open-source, smartphone-first falling-block puzzle game built to feel like the clean monochrome games people remember from old button phones: small LCD-style screen, simple controls, no clutter, fast restarts, and a focused score chase.
 
-It is intentionally lightweight. No backend. No tracking. No copied assets. It runs as a real Android APK, and the same codebase can still run as a static web demo.
+It is intentionally lightweight. No backend. No tracking. No copied assets. It has a Vercel web version for quick play, plus a real native Android APK for people who want an installed phone app.
 
 > Legal note: this is an original open-source implementation inspired by classic monochrome mobile puzzle games. It does not include proprietary Nokia assets, proprietary Tetris assets, ROMs, official logos, official sounds, or copied game code. The public name is **Pocket Bricks** to keep the repository safe for open-source use.
 
-## Android APK
+## Play now
 
-Pocket Bricks is now packaged as a real Android app with Capacitor.
-
-Every push to `main` runs the **Build Android APK** workflow. When it passes, GitHub uploads an installable debug APK artifact named:
+Web version:
 
 ```text
-pocket-bricks-debug-apk
+https://pocket-bricks.vercel.app
 ```
+
+## Real Android APK
+
+Pocket Bricks now includes a real Android app in:
+
+```text
+native-android/
+```
+
+This is not an Add to Home Screen shortcut and not a PWA-only delivery path. The APK has its own Android package, launcher icon, fullscreen app shell, touch controls, settings panel, local memory, repo links, developer links, and release-update path.
 
 ### Install on Android without Play Store
 
 1. Open the repository on your phone.
-2. Go to **Actions**.
-3. Open the latest successful **Build Android APK** run.
-4. Download the `pocket-bricks-debug-apk` artifact.
-5. Extract it if Android downloads it as a ZIP.
-6. Tap `pocket-bricks-debug.apk`.
-7. Allow **Install unknown apps** for the browser or file manager when Android asks.
-8. Launch **Pocket Bricks** from the app drawer.
+2. Go to **Releases**.
+3. Download `Pocket-Bricks.apk`.
+4. Open the downloaded APK.
+5. Allow **Install unknown apps** for the browser or file manager if Android asks.
+6. Launch **Pocket Bricks** from your app drawer.
 
-For public testers, publish a GitHub Release and attach the APK there. The app checks the latest GitHub Release and shows a small update notice when a newer APK exists.
+Releases:
+
+```text
+https://github.com/imranshiundu/pocket-bricks/releases
+```
+
+### Termux install
+
+```bash
+pkg update -y
+pkg install -y git curl
+mkdir -p ~/apps
+cd ~/apps
+git clone https://github.com/imranshiundu/pocket-bricks.git
+cd pocket-bricks
+bash scripts/install-android-termux.sh
+```
+
+The Termux script downloads the latest release APK into the phone Downloads folder and opens it for installation when possible.
 
 ## Updates
 
-GitHub does not provide a public WebSocket channel that can safely push release updates directly to an APK. Pocket Bricks uses the safer open-source method:
+Without Play Store distribution, Android should not be forced to silently replace apps in the background. Pocket Bricks uses a safer open-source update model:
 
-- The installed app checks the latest GitHub Release occasionally.
-- If the release tag is newer than the installed app version, it shows **GET UPDATE** inside the game.
-- The button opens the GitHub Releases page.
-- No tracking server, no forced updates, no Play Store dependency.
+- APK builds are published on GitHub Releases.
+- The installed app links users to the Releases page from settings.
+- Users download the new `Pocket-Bricks.apk` and Android installs it over the existing app because the package name stays the same.
 
-## Web demo
+This avoids pretending that a sideloaded APK can safely auto-update invisibly.
 
-The web demo can still be deployed manually with the GitHub Pages workflow:
+## Settings in the APK
+
+The native APK has a small **SET** button at the top-right of the game screen. From settings, users can:
+
+- choose the starting level,
+- view local memory: best score, last score, and plays,
+- open APK releases,
+- open the source repository,
+- open developer details.
+
+## GitHub Actions
+
+The native APK workflow is:
 
 ```text
-https://imranshiundu.github.io/pocket-bricks/
+Build Native Android APK
 ```
 
-The Pages workflow is manual-only to stop failed deploy emails from arriving on every normal code push.
+It runs manually or when a tag is pushed:
 
-## What it delivers
+```text
+android-1.2.0
+v1.2.0
+```
 
-- Real Android APK build workflow.
-- Classic 10 x 20 falling-block board.
-- Seven familiar block shapes.
-- Memoryless old-phone style piece selection instead of a modern 7-bag feel.
-- Simple wall-kick rotation that feels forgiving without becoming modern/arcade-heavy.
-- Classic scoring table: single, double, triple, four-line clear.
-- Smartphone keypad with left, right, down, rotate, and drop.
-- Keyboard support for desktop testing.
-- Monochrome LCD visual direction.
-- Local memory: best score, last score, games played, best level, best lines, sound preference, and update-check state.
-- Optional square-wave beeps generated by Web Audio.
-- Native haptic taps where supported.
-- In-app GitHub release update notice.
-- Core game logic separated from rendering and covered by tests.
+It does not run on every normal push. That reduces failed-run email notifications.
 
-## Interface rule
+## Web build
 
-The game UI is not a fake phone. The app keeps only the useful parts: the LCD game screen and button-style controls. The phone body/mockup has been removed so it feels like a real smartphone game with old-phone taste, not a screenshot inside a phone template.
-
-## Controls
-
-### Smartphone
-
-| Button | Action |
-| --- | --- |
-| LEFT | Move block left |
-| RIGHT | Move block right |
-| DOWN | Soft drop |
-| ROT | Rotate clockwise |
-| DROP | Hard drop |
-| START | Start or restart |
-| PAUSE | Pause or resume |
-
-### Keyboard
-
-| Key | Action |
-| --- | --- |
-| Arrow Left / 4 / A | Move left |
-| Arrow Right / 6 / D | Move right |
-| Arrow Down / 8 / S | Soft drop |
-| Arrow Up / 5 / W | Rotate |
-| Space / 0 | Hard drop |
-| Enter | Start |
-| P | Pause |
-
-## Run locally
+The web version can be deployed to Vercel. It remains useful for instant play, sharing, and testing, but it is not the only app path.
 
 ```bash
 npm install
@@ -116,54 +113,46 @@ http://localhost:4173
 ## Build APK locally
 
 ```bash
-npm install
-npx cap add android
-npm run sync:android
-cd android
-./gradlew assembleDebug
+git clone https://github.com/imranshiundu/pocket-bricks.git
+cd pocket-bricks/native-android
+gradle :app:assembleDebug --no-daemon
 ```
 
-The APK will be created at:
+Output:
 
 ```text
-android/app/build/outputs/apk/debug/app-debug.apk
+native-android/app/build/outputs/apk/debug/app-debug.apk
 ```
+
+## What it delivers
+
+- Vercel-ready browser version.
+- Real native Android APK project.
+- Classic 10 x 20 falling-block board.
+- Seven familiar block shapes.
+- Smartphone keypad with left, right, down, rotate, and drop.
+- Monochrome LCD visual direction.
+- Local memory: best score, last score, plays, level preference, and sound preference.
+- Top-right settings panel.
+- GitHub Releases update path.
+- Repository and developer links inside the app.
+- Core web game logic separated from rendering and covered by tests.
 
 ## Project structure
 
 ```text
 .
 ├── assets/                  # Original icon and visual assets
-├── docs/                    # Architecture, gameplay, and testing docs
-├── native/                  # Native Android build notes
-├── src/
-│   ├── app.js               # Canvas, controls, local memory, sound, native hooks, update checker
-│   ├── game.js              # Pure game engine: board, movement, scoring, collisions
-│   └── styles.css           # Monochrome LCD screen and mobile keypad UI
-├── tests/                   # Node test suite for the game engine
-├── capacitor.config.json    # Native app configuration
-├── index.html               # App entry
-├── manifest.webmanifest     # Web demo install metadata
-├── sw.js                    # Offline cache for web demo
-└── package.json             # Scripts and metadata
+├── docs/                    # Architecture, gameplay, APK install notes
+├── native-android/          # Real Android APK project
+├── scripts/                 # Termux installer helper
+├── src/                     # Web app/game source
+├── tests/                   # Node test suite for the web game engine
+├── index.html               # Web app entry
+├── manifest.webmanifest     # Optional web install metadata
+├── sw.js                    # Optional offline web cache
+└── package.json             # Web scripts and metadata
 ```
-
-## Architecture
-
-The game has two layers:
-
-1. **Game engine** — `src/game.js` is pure JavaScript. It knows nothing about the DOM. This makes movement, rotation, collision, line clearing, scoring, and level progression testable.
-2. **App shell** — `src/app.js` handles canvas drawing, touch controls, keyboard controls, local memory, sound, native haptics, release update checks, and web install prompts.
-
-This separation keeps the project easy for open-source contributors to understand.
-
-## Testing
-
-```bash
-npm test
-```
-
-The current suite checks board dimensions, rotation, wall collision, line clearing, score application, hard drop, and pause behavior.
 
 ## Open-source standards
 
