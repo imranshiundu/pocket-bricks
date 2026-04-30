@@ -160,21 +160,40 @@ export class PocketBricksGame {
     return Math.max(90, 760 - (this.level - 1) * 55);
   }
 
+  getGhostPiece() {
+    if (!this.current) return null;
+    const ghost = { ...this.current, matrix: clone(this.current.matrix) };
+    while (!this.collides(ghost.row + 1, ghost.col, ghost.matrix)) ghost.row += 1;
+    return ghost;
+  }
+
+  getCells(piece = this.current) {
+    if (!piece) return [];
+    const cells = [];
+    piece.matrix.forEach((row, y) => row.forEach((v, x) => {
+      const by = piece.row + y;
+      const bx = piece.col + x;
+      if (v && by >= 0) cells.push({ x: bx, y: by, type: piece.type });
+    }));
+    return cells;
+  }
+
   visibleBoard() {
     const board = this.board.map((row) => row.slice());
-    const p = this.current;
-    if (!p) return board;
-    p.matrix.forEach((row, y) => row.forEach((v, x) => {
-      if (v && p.row + y >= 0) board[p.row + y][p.col + x] = p.type;
-    }));
+    this.getCells().forEach(({ x, y, type }) => { board[y][x] = type; });
     return board;
   }
 
   snapshot() {
+    const current = this.current ? { ...this.current, matrix: clone(this.current.matrix) } : null;
+    const ghost = this.getGhostPiece();
     return {
       board: this.board.map((r) => r.slice()),
       visibleBoard: this.visibleBoard(),
-      current: this.current ? { ...this.current, matrix: clone(this.current.matrix) } : null,
+      current,
+      currentCells: this.getCells(current),
+      ghost,
+      ghostCells: this.getCells(ghost),
       nextType: this.nextType,
       score: this.score,
       lines: this.lines,
