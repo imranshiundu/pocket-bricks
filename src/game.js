@@ -14,6 +14,7 @@ export const PIECES = {
 const TYPES = Object.keys(PIECES);
 const SCORES = [0, 40, 100, 300, 1200];
 const clone = (m) => m.map((r) => r.slice());
+const clampLevel = (level) => Math.max(1, Math.min(9, Math.floor(Number(level) || 1)));
 
 export function createBoard(rows = ROWS, cols = COLS) {
   return Array.from({ length: rows }, () => Array(cols).fill(0));
@@ -26,14 +27,18 @@ export function rotateClockwise(matrix) {
 export class PocketBricksGame {
   constructor(options = {}) {
     this.random = options.random || Math.random;
-    this.reset();
+    this.startLevel = clampLevel(options.startLevel || 1);
+    this.startLinesOffset = (this.startLevel - 1) * 10;
+    this.reset({ startLevel: this.startLevel });
   }
 
-  reset() {
+  reset(options = {}) {
+    if (options.startLevel !== undefined) this.startLevel = clampLevel(options.startLevel);
+    this.startLinesOffset = (this.startLevel - 1) * 10;
     this.board = createBoard();
     this.score = 0;
     this.lines = 0;
-    this.level = 1;
+    this.level = this.startLevel;
     this.running = false;
     this.paused = false;
     this.gameOver = false;
@@ -41,8 +46,8 @@ export class PocketBricksGame {
     this.nextType = this.randomType();
   }
 
-  start() {
-    this.reset();
+  start(options = {}) {
+    this.reset(options);
     this.running = true;
     this.spawn();
     return this.snapshot();
@@ -125,7 +130,7 @@ export class PocketBricksGame {
     const cleared = this.clearLines();
     if (cleared) {
       this.lines += cleared;
-      this.level = Math.floor(this.lines / 10) + 1;
+      this.level = Math.floor((this.startLinesOffset + this.lines) / 10) + 1;
       this.score += SCORES[cleared] * this.level;
     }
     this.spawn();
@@ -166,6 +171,19 @@ export class PocketBricksGame {
   }
 
   snapshot() {
-    return { board: this.board.map((r) => r.slice()), visibleBoard: this.visibleBoard(), current: this.current ? { ...this.current, matrix: clone(this.current.matrix) } : null, nextType: this.nextType, score: this.score, lines: this.lines, level: this.level, running: this.running, paused: this.paused, gameOver: this.gameOver, dropInterval: this.getDropInterval() };
+    return {
+      board: this.board.map((r) => r.slice()),
+      visibleBoard: this.visibleBoard(),
+      current: this.current ? { ...this.current, matrix: clone(this.current.matrix) } : null,
+      nextType: this.nextType,
+      score: this.score,
+      lines: this.lines,
+      level: this.level,
+      startLevel: this.startLevel,
+      running: this.running,
+      paused: this.paused,
+      gameOver: this.gameOver,
+      dropInterval: this.getDropInterval()
+    };
   }
 }
