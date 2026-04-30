@@ -118,19 +118,27 @@ const audio = {
 };
 function tap() { getNativePlugin('Haptics')?.impact?.({ style: 'LIGHT' }).catch(() => {}); }
 
-function drawCell(ctx, x, y, size, filled) {
+function drawCell(ctx, x, y, size, filled, ghost = false) {
   ctx.fillStyle = filled ? '#142318' : 'rgba(20,35,24,0.11)';
   ctx.fillRect(x, y, size - 1, size - 1);
   if (filled) {
     ctx.fillStyle = 'rgba(225,239,194,0.16)';
     ctx.fillRect(x + 1, y + 1, size - 3, 2);
   }
+  if (ghost) {
+    ctx.fillStyle = 'transparent';
+    ctx.strokeStyle = 'rgba(20,35,24,0.38)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 2, y + 2, size - 5, size - 5);
+  }
 }
 function drawBoard(state) {
   const cell = boardCanvas.width / COLS;
   boardCtx.fillStyle = '#b5c88e';
   boardCtx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
-  state.visibleBoard.forEach((row, y) => row.forEach((v, x) => drawCell(boardCtx, x * cell, y * cell, cell, Boolean(v))));
+  state.board.forEach((row, y) => row.forEach((v, x) => drawCell(boardCtx, x * cell, y * cell, cell, Boolean(v))));
+  state.ghostCells.forEach(({ x, y }) => drawCell(boardCtx, x * cell, y * cell, cell, false, true));
+  state.currentCells.forEach(({ x, y }) => drawCell(boardCtx, x * cell, y * cell, cell, true));
 }
 function drawNext(type) {
   nextCtx.fillStyle = '#b5c88e';
