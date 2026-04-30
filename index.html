@@ -17,56 +17,60 @@
         <span>BRICKS</span>
       </section>
 
-      <section class="screen-shell" aria-label="Game screen">
-        <div class="lcd">
-          <header class="hud" aria-label="Scoreboard">
-            <div>
-              <span>Score</span>
+      <section class="screen-shell">
+        <div class="screen-frame">
+          <div class="screen-head">
+            <div class="hud-card">
+              <span class="hud-label">SCORE</span>
               <strong id="score">000000</strong>
             </div>
-            <div>
-              <span>Best</span>
+            <div class="hud-card">
+              <span class="hud-label">BEST</span>
               <strong id="best">000000</strong>
             </div>
-          </header>
+          </div>
 
-          <section class="play-row">
-            <canvas id="board" width="200" height="400" aria-label="Game board"></canvas>
-            <aside class="side-panel" aria-label="Game information">
-              <div class="next-box">
-                <span>Next</span>
-                <canvas id="next" width="72" height="72" aria-label="Next block"></canvas>
+          <div class="play-layout">
+            <canvas id="board" width="240" height="480" aria-label="Game board"></canvas>
+            <aside class="side-panel" aria-label="Game statistics">
+              <div>
+                <span class="hud-label">NEXT</span>
+                <canvas id="next" width="76" height="76" aria-label="Next brick"></canvas>
               </div>
-              <div class="mini-stat">
-                <span>Lines</span>
+              <div class="stacked-stat">
+                <span class="hud-label">LINES</span>
                 <strong id="lines">000</strong>
               </div>
-              <div class="mini-stat">
-                <span>Level</span>
+              <div class="stacked-stat">
+                <span class="hud-label">LEVEL</span>
                 <strong id="level">01</strong>
               </div>
             </aside>
-          </section>
+          </div>
 
-          <footer class="status" id="status">Press START</footer>
+          <p id="status" class="status" role="status" aria-live="polite">READY — PRESS START</p>
         </div>
       </section>
 
-      <section class="menu-row" aria-label="System controls">
-        <button id="start" type="button">Start</button>
-        <button id="pause" type="button">Pause</button>
-        <button id="sound" type="button" aria-pressed="false">Sound</button>
+      <section class="meta-controls" aria-label="Game controls">
+        <button id="startBtn" class="pill-button" data-action="start" type="button">START</button>
+        <button id="pauseBtn" class="pill-button" data-action="pause" type="button">PAUSE</button>
+        <button id="soundBtn" class="pill-button" type="button">SOUND ON</button>
       </section>
 
-      <section class="keypad" aria-label="Game controls">
-        <button class="nav rotate" type="button" data-action="rotate">ROT</button>
-        <button class="nav left" type="button" data-action="left">LEFT</button>
-        <button class="nav right" type="button" data-action="right">RIGHT</button>
-        <button class="nav down" type="button" data-action="down">DOWN</button>
-        <button class="drop" type="button" data-action="drop">DROP</button>
+      <section class="keypad" aria-label="Touch keypad">
+        <div class="dpad" aria-label="Directional pad">
+          <button class="key key-up" data-action="rotate" type="button" aria-label="Rotate">ROT</button>
+          <button class="key key-left" data-action="left" type="button" aria-label="Move left">LEFT</button>
+          <button class="key key-right" data-action="right" type="button" aria-label="Move right">RIGHT</button>
+          <button class="key key-down" data-action="down" type="button" aria-label="Move down">DOWN</button>
+        </div>
+        <button class="fire-key" data-action="drop" type="button" aria-label="Hard drop">DROP</button>
       </section>
 
-      <p class="hint">Arrows / WASD / 4-5-6-8. Space drops. P pauses.</p>
+      <footer class="help-text">
+        Keyboard: arrows or 4/5/6/8. Space drops. P pauses.
+      </footer>
     </main>
 
     <script type="module" src="./src/app.js"></script>
