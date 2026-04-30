@@ -22,9 +22,24 @@ Pocket Bricks uses a classic 10 x 20 board and seven block shapes. The design ta
 
 Hard drop adds 2 points per dropped cell.
 
+## Local memory
+
+The browser stores a small memory record using local storage:
+
+- Best score.
+- Last finished score.
+- Games played.
+- Best level reached.
+- Best line count.
+- Sound preference.
+
+There is no account, backend, analytics, leaderboard, cloud sync, or personal data collection.
+
 ## Feel rules
 
 - Keep the game monochrome.
 - Keep the board readable under thumb play.
 - Keep restarts instant.
+- Do not use a fake phone body as the main interface.
+- Keep the LCD screen and tactile controls.
 - Do not add heavy menus or distracting animations.
