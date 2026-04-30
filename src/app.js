@@ -16,8 +16,12 @@ const soundBtn = $('#soundBtn');
 const lastScoreEl = $('#lastScore');
 const gamesPlayedEl = $('#gamesPlayed');
 const bestLevelEl = $('#bestLevel');
+const installPanel = $('#installPanel');
+const installBtn = $('#installBtn');
+const installHelp = $('#installHelp');
 
 const MEMORY_KEY = 'pocket-bricks-memory-v1';
+const INSTALL_DISMISSED_KEY = 'pocket-bricks-install-dismissed-v1';
 const oldBest = Number(localStorage.getItem('pocket-bricks-best') || 0);
 const defaultMemory = { bestScore: oldBest, lastScore: 0, gamesPlayed: 0, bestLevel: 1, bestLines: 0, sound: localStorage.getItem('pocket-bricks-sound') !== 'off' };
 const loadMemory = () => {
@@ -34,8 +38,18 @@ let memory = loadMemory();
 let soundEnabled = memory.sound;
 let audioContext;
 let finalSavedForRound = false;
+let deferredInstallPrompt = null;
 
 function pad(n, l = 6) { return String(n).padStart(l, '0'); }
+function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function isIos() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function showInstallPanel(text, buttonText = 'INSTALL APP') {
+  if (!installPanel || isStandalone() || localStorage.getItem(INSTALL_DISMISSED_KEY) === 'yes') return;
+  installHelp.textContent = text;
+  installBtn.textContent = buttonText;
+  installPanel.classList.add('is-visible');
+}
+function hideInstallPanel() { installPanel?.classList.remove('is-visible'); }
 function beep(freq = 330, duration = 0.05) {
   if (!soundEnabled) return;
   audioContext ||= new AudioContext();
@@ -140,6 +154,31 @@ soundBtn.addEventListener('click', () => {
   soundBtn.textContent = soundEnabled ? 'SOUND ON' : 'SOUND OFF';
   if (soundEnabled) beep(440, 0.06);
 });
+installBtn?.addEventListener('click', async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice.catch(() => null);
+    deferredInstallPrompt = null;
+    hideInstallPanel();
+    return;
+  }
+  if (isIos()) {
+    installHelp.textContent = 'On iPhone: tap Share, then Add to Home Screen.';
+  } else {
+    installHelp.textContent = 'Open the browser menu and choose Install app or Add to Home screen.';
+  }
+});
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  showInstallPanel('Install to home screen for full app mode.');
+});
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem(INSTALL_DISMISSED_KEY, 'yes');
+  deferredInstallPrompt = null;
+  hideInstallPanel();
+});
 
 window.addEventListener('keydown', (e) => {
   const map = { ArrowLeft: 'left', a: 'left', A: 'left', '4': 'left', ArrowRight: 'right', d: 'right', D: 'right', '6': 'right', ArrowDown: 'down', s: 'down', S: 'down', '8': 'down', ArrowUp: 'rotate', w: 'rotate', W: 'rotate', '5': 'rotate', ' ': 'drop', '0': 'drop' };
@@ -149,6 +188,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+if (isIos()) showInstallPanel('iPhone: tap Share, then Add to Home Screen.', 'HOW TO INSTALL');
 soundBtn.textContent = soundEnabled ? 'SOUND ON' : 'SOUND OFF';
 render();
 raf = requestAnimationFrame(loop);
