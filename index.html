@@ -4,10 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#121212" />
+    <meta name="application-name" content="Pocket Bricks" />
+    <meta name="apple-mobile-web-app-title" content="Pocket Bricks" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="description" content="Pocket Bricks is an open-source old-phone-style falling-block puzzle game rebuilt for smartphones." />
     <title>Pocket Bricks</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./assets/icon.svg" />
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
@@ -60,6 +66,11 @@
           <span>TOP LV</span>
           <strong id="bestLevel">01</strong>
         </div>
+      </section>
+
+      <section id="installPanel" class="install-strip" aria-label="Install Pocket Bricks">
+        <button id="installBtn" class="install-button" type="button">INSTALL APP</button>
+        <p id="installHelp" class="install-help">Install to home screen for full app mode.</p>
       </section>
 
       <section class="meta-controls" aria-label="Game controls">
