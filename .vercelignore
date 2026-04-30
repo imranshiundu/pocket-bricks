@@ -1,0 +1,10 @@
+android
+www
+node_modules
+.github
+native
+tests
+docs
+*.apk
+*.zip
+.DS_Store
