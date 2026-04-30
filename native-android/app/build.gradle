@@ -1,0 +1,16 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'dev.imran.pocketbricks'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'dev.imran.pocketbricks'
+        minSdk 23
+        targetSdk 35
+        versionCode 120
+        versionName '1.2.0'
+    }
+}
