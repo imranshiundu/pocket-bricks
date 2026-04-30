@@ -1,8 +1,6 @@
 name: Deploy static app to GitHub Pages
 
-# The Android APK is now the primary app target.
-# Keep the web demo deploy manual-only so a Pages configuration problem does not
-# send a failed email on every normal code push.
+# Manual-only because the APK and Vercel are the primary release paths.
 on:
   workflow_dispatch:
 
@@ -24,12 +22,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test
+        run: npm test
+
+      - name: Build static site
+        run: npm run build
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
