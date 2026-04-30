@@ -59,6 +59,36 @@ test('hard drop locks a piece', () => {
   assert.ok(g.board.some((row) => row.some(Boolean)));
 });
 
+test('ghost projection lands below current piece without mutating it', () => {
+  const g = new PocketBricksGame({ random: () => 0 });
+  const started = g.start();
+  const ghost = g.getGhostPiece();
+  assert.ok(ghost);
+  assert.equal(started.current.row, 0);
+  assert.equal(g.snapshot().current.row, 0);
+  assert.equal(ghost.col, started.current.col);
+  assert.deepEqual(ghost.matrix, started.current.matrix);
+  assert.ok(ghost.row > started.current.row);
+  assert.equal(g.collides(ghost.row + 1, ghost.col, ghost.matrix), true);
+});
+
+test('ghost projection respects stacked blocks', () => {
+  const g = new PocketBricksGame({ random: () => 1 / 7 });
+  g.start();
+  g.board[ROWS - 2] = Array(COLS).fill('X');
+  const ghost = g.getGhostPiece();
+  assert.ok(ghost.row < ROWS - 2);
+  assert.equal(g.collides(ghost.row + 1, ghost.col, ghost.matrix), true);
+});
+
+test('snapshot exposes ghost cells for rendering', () => {
+  const g = new PocketBricksGame({ random: () => 0 });
+  const s = g.start();
+  assert.ok(Array.isArray(s.ghostCells));
+  assert.equal(s.ghostCells.length, s.currentCells.length);
+  assert.ok(s.ghostCells.every((cell) => Number.isInteger(cell.x) && Number.isInteger(cell.y)));
+});
+
 test('pause toggles only while running', () => {
   const g = new PocketBricksGame({ random: () => 0 });
   assert.equal(g.pause(), false);
