@@ -1,9 +1,14 @@
 name: Build Android APK
 
-# The Android build is manual/tag based so normal code pushes do not spam
-# failed GitHub Actions emails while the app is being iterated.
+# Manual/tag based so normal code pushes do not spam failed Actions emails.
 on:
   workflow_dispatch:
+    inputs:
+      publish_latest:
+        description: "Attach this APK to the android-latest GitHub Release"
+        required: false
+        type: boolean
+        default: true
   push:
     tags:
       - "v*"
@@ -68,7 +73,7 @@ jobs:
           path: pocket-bricks-debug.apk
           if-no-files-found: error
 
-      - name: Attach APK to GitHub Release
+      - name: Attach APK to version tag release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
@@ -77,3 +82,13 @@ jobs:
             --title "Pocket Bricks ${GITHUB_REF_NAME}" \
             --notes "Installable Android APK for Pocket Bricks." \
             --latest
+
+      - name: Attach APK to android-latest release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest pocket-bricks-debug.apk \
+            --title "Pocket Bricks Android Latest" \
+            --notes "Latest installable Android APK. Download pocket-bricks-debug.apk and install it on Android."
