@@ -1,8 +1,9 @@
 name: Deploy static app to GitHub Pages
 
+# The Android APK is now the primary app target.
+# Keep the web demo deploy manual-only so a Pages configuration problem does not
+# send a failed email on every normal code push.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
