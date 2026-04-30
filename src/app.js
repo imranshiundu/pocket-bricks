@@ -23,13 +23,22 @@ const updatePanel = $('#updatePanel');
 const updateBtn = $('#updateBtn');
 const updateHelp = $('#updateHelp');
 
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.2';
 const RELEASES_URL = 'https://github.com/imranshiundu/pocket-bricks/releases';
 const LATEST_RELEASE_API = 'https://api.github.com/repos/imranshiundu/pocket-bricks/releases/latest';
 const MEMORY_KEY = 'pocket-bricks-memory-v1';
 const INSTALL_DISMISSED_KEY = 'pocket-bricks-install-dismissed-v1';
 const oldBest = Number(localStorage.getItem('pocket-bricks-best') || 0);
-const defaultMemory = { bestScore: oldBest, lastScore: 0, gamesPlayed: 0, bestLevel: 1, bestLines: 0, sound: localStorage.getItem('pocket-bricks-sound') !== 'off', lastUpdateCheck: 0, latestVersionSeen: APP_VERSION };
+const defaultMemory = {
+  bestScore: oldBest,
+  lastScore: 0,
+  gamesPlayed: 0,
+  bestLevel: 1,
+  bestLines: 0,
+  sound: localStorage.getItem('pocket-bricks-sound') !== 'off',
+  lastUpdateCheck: 0,
+  latestVersionSeen: APP_VERSION,
+};
 const loadMemory = () => {
   try { return { ...defaultMemory, ...JSON.parse(localStorage.getItem(MEMORY_KEY) || '{}') }; }
   catch { return { ...defaultMemory }; }
@@ -45,22 +54,12 @@ let soundEnabled = memory.sound;
 let audioContext;
 let finalSavedForRound = false;
 let deferredInstallPrompt = null;
-let CapacitorBrowser = null;
-let Haptics = null;
 
-async function loadNativePlugins() {
-  try {
-    const browser = await import('@capacitor/browser');
-    CapacitorBrowser = browser.Browser;
-  } catch {}
-  try {
-    const haptics = await import('@capacitor/haptics');
-    Haptics = haptics.Haptics;
-  } catch {}
+function getNativePlugin(name) {
+  return window.Capacitor?.Plugins?.[name] || null;
 }
-loadNativePlugins();
-
 function pad(n, l = 6) { return String(n).padStart(l, '0'); }
+function isNativeAndroid() { return window.Capacitor?.getPlatform?.() === 'android'; }
 function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true || window.Capacitor?.isNativePlatform?.(); }
 function isIos() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function versionNumber(tag) {
@@ -80,22 +79,27 @@ function showUpdatePanel(tag) {
   updatePanel.classList.add('is-visible');
 }
 async function openExternal(url) {
-  if (CapacitorBrowser) await CapacitorBrowser.open({ url });
+  const Browser = getNativePlugin('Browser');
+  if (Browser?.open) await Browser.open({ url });
   else window.open(url, '_blank', 'noopener,noreferrer');
 }
 function beep(freq = 330, duration = 0.05) {
   if (!soundEnabled) return;
-  audioContext ||= new AudioContext();
-  const osc = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-  osc.type = 'square';
-  osc.frequency.value = freq;
-  gain.gain.value = 0.025;
-  osc.connect(gain).connect(audioContext.destination);
-  osc.start();
-  osc.stop(audioContext.currentTime + duration);
+  try {
+    audioContext ||= new AudioContext();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    gain.gain.value = 0.025;
+    osc.connect(gain).connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime + duration);
+  } catch {}
 }
-function tap() { Haptics?.impact?.({ style: 'LIGHT' }).catch(() => {}); }
+function tap() {
+  getNativePlugin('Haptics')?.impact?.({ style: 'LIGHT' }).catch(() => {});
+}
 
 function drawCell(ctx, x, y, size, filled) {
   ctx.fillStyle = filled ? '#142318' : 'rgba(20,35,24,0.11)';
@@ -177,12 +181,13 @@ function action(name) {
 
 async function checkForUpdates() {
   const now = Date.now();
+  if (!isNativeAndroid() && !isStandalone()) return;
   if (now - Number(memory.lastUpdateCheck || 0) < 6 * 60 * 60 * 1000) {
     if (hasNewerVersion(memory.latestVersionSeen, APP_VERSION)) showUpdatePanel(memory.latestVersionSeen);
     return;
   }
   try {
-    const res = await fetch(LATEST_RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } });
+    const res = await fetch(LATEST_RELEASE_API, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
     const latestTag = data.tag_name || data.name;
