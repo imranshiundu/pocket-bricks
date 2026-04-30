@@ -1,4 +1,4 @@
-import { COLS, ROWS, PIECES, PocketBricksGame } from './game.js';
+import { COLS, PIECES, PocketBricksGame } from './game.js';
 
 const $ = (s) => document.querySelector(s);
 const boardCanvas = $('#board');
@@ -13,14 +13,27 @@ const statusEl = $('#status');
 const startBtn = $('#startBtn');
 const pauseBtn = $('#pauseBtn');
 const soundBtn = $('#soundBtn');
+const lastScoreEl = $('#lastScore');
+const gamesPlayedEl = $('#gamesPlayed');
+const bestLevelEl = $('#bestLevel');
+
+const MEMORY_KEY = 'pocket-bricks-memory-v1';
+const oldBest = Number(localStorage.getItem('pocket-bricks-best') || 0);
+const defaultMemory = { bestScore: oldBest, lastScore: 0, gamesPlayed: 0, bestLevel: 1, bestLines: 0, sound: localStorage.getItem('pocket-bricks-sound') !== 'off' };
+const loadMemory = () => {
+  try { return { ...defaultMemory, ...JSON.parse(localStorage.getItem(MEMORY_KEY) || '{}') }; }
+  catch { return { ...defaultMemory }; }
+};
+const saveMemory = () => localStorage.setItem(MEMORY_KEY, JSON.stringify(memory));
 
 const game = new PocketBricksGame();
 let last = 0;
 let elapsed = 0;
 let raf = 0;
-let best = Number(localStorage.getItem('pocket-bricks-best') || 0);
-let soundEnabled = localStorage.getItem('pocket-bricks-sound') !== 'off';
+let memory = loadMemory();
+let soundEnabled = memory.sound;
 let audioContext;
+let finalSavedForRound = false;
 
 function pad(n, l = 6) { return String(n).padStart(l, '0'); }
 function beep(freq = 330, duration = 0.05) {
@@ -62,16 +75,31 @@ function drawNext(type) {
   m.forEach((row, y) => row.forEach((v, x) => drawCell(nextCtx, ox + x * cell, oy + y * cell, cell, Boolean(v))));
 }
 
+function saveFinishedGame(state) {
+  if (finalSavedForRound || !state.gameOver) return;
+  finalSavedForRound = true;
+  memory.lastScore = state.score;
+  memory.bestScore = Math.max(memory.bestScore, state.score);
+  memory.bestLevel = Math.max(memory.bestLevel, state.level);
+  memory.bestLines = Math.max(memory.bestLines, state.lines);
+  memory.gamesPlayed += 1;
+  localStorage.setItem('pocket-bricks-best', String(memory.bestScore));
+  saveMemory();
+}
+
 function render() {
   const s = game.snapshot();
+  saveFinishedGame(s);
+  memory.bestScore = Math.max(memory.bestScore, s.score);
   drawBoard(s);
   drawNext(s.nextType);
   scoreEl.textContent = pad(s.score);
-  best = Math.max(best, s.score);
-  localStorage.setItem('pocket-bricks-best', String(best));
-  bestEl.textContent = pad(best);
+  bestEl.textContent = pad(memory.bestScore);
   linesEl.textContent = pad(s.lines, 3);
   levelEl.textContent = pad(s.level, 2);
+  lastScoreEl.textContent = pad(memory.lastScore);
+  gamesPlayedEl.textContent = pad(memory.gamesPlayed, 3);
+  bestLevelEl.textContent = pad(memory.bestLevel, 2);
   pauseBtn.textContent = s.paused ? 'RESUME' : 'PAUSE';
   statusEl.textContent = s.gameOver ? 'GAME OVER — PRESS START' : s.paused ? 'PAUSED' : s.running ? 'PLAYING — KEEP STACK LOW' : 'READY — PRESS START';
 }
@@ -87,7 +115,7 @@ function loop(time = 0) {
   raf = requestAnimationFrame(loop);
 }
 
-function startGame() { elapsed = 0; game.start(); beep(520, 0.08); render(); }
+function startGame() { elapsed = 0; finalSavedForRound = false; game.start(); beep(520, 0.08); render(); }
 function action(name) {
   if (!game.snapshot().running && name !== 'start') startGame();
   if (name === 'left' && game.move(-1)) beep(260, 0.025);
@@ -106,7 +134,9 @@ startBtn.addEventListener('click', startGame);
 pauseBtn.addEventListener('click', () => { game.pause(); render(); });
 soundBtn.addEventListener('click', () => {
   soundEnabled = !soundEnabled;
+  memory.sound = soundEnabled;
   localStorage.setItem('pocket-bricks-sound', soundEnabled ? 'on' : 'off');
+  saveMemory();
   soundBtn.textContent = soundEnabled ? 'SOUND ON' : 'SOUND OFF';
   if (soundEnabled) beep(440, 0.06);
 });
