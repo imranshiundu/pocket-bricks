@@ -19,11 +19,17 @@ const bestLevelEl = $('#bestLevel');
 const installPanel = $('#installPanel');
 const installBtn = $('#installBtn');
 const installHelp = $('#installHelp');
+const updatePanel = $('#updatePanel');
+const updateBtn = $('#updateBtn');
+const updateHelp = $('#updateHelp');
 
+const APP_VERSION = '1.1.0';
+const RELEASES_URL = 'https://github.com/imranshiundu/pocket-bricks/releases';
+const LATEST_RELEASE_API = 'https://api.github.com/repos/imranshiundu/pocket-bricks/releases/latest';
 const MEMORY_KEY = 'pocket-bricks-memory-v1';
 const INSTALL_DISMISSED_KEY = 'pocket-bricks-install-dismissed-v1';
 const oldBest = Number(localStorage.getItem('pocket-bricks-best') || 0);
-const defaultMemory = { bestScore: oldBest, lastScore: 0, gamesPlayed: 0, bestLevel: 1, bestLines: 0, sound: localStorage.getItem('pocket-bricks-sound') !== 'off' };
+const defaultMemory = { bestScore: oldBest, lastScore: 0, gamesPlayed: 0, bestLevel: 1, bestLines: 0, sound: localStorage.getItem('pocket-bricks-sound') !== 'off', lastUpdateCheck: 0, latestVersionSeen: APP_VERSION };
 const loadMemory = () => {
   try { return { ...defaultMemory, ...JSON.parse(localStorage.getItem(MEMORY_KEY) || '{}') }; }
   catch { return { ...defaultMemory }; }
@@ -39,10 +45,28 @@ let soundEnabled = memory.sound;
 let audioContext;
 let finalSavedForRound = false;
 let deferredInstallPrompt = null;
+let CapacitorBrowser = null;
+let Haptics = null;
+
+async function loadNativePlugins() {
+  try {
+    const browser = await import('@capacitor/browser');
+    CapacitorBrowser = browser.Browser;
+  } catch {}
+  try {
+    const haptics = await import('@capacitor/haptics');
+    Haptics = haptics.Haptics;
+  } catch {}
+}
+loadNativePlugins();
 
 function pad(n, l = 6) { return String(n).padStart(l, '0'); }
-function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true || window.Capacitor?.isNativePlatform?.(); }
 function isIos() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function versionNumber(tag) {
+  return String(tag || '0').replace(/^v/i, '').split('.').reduce((n, part, i) => n + (Number(part) || 0) * Math.pow(100, 2 - i), 0);
+}
+function hasNewerVersion(latest, current) { return versionNumber(latest) > versionNumber(current); }
 function showInstallPanel(text, buttonText = 'INSTALL APP') {
   if (!installPanel || isStandalone() || localStorage.getItem(INSTALL_DISMISSED_KEY) === 'yes') return;
   installHelp.textContent = text;
@@ -50,6 +74,15 @@ function showInstallPanel(text, buttonText = 'INSTALL APP') {
   installPanel.classList.add('is-visible');
 }
 function hideInstallPanel() { installPanel?.classList.remove('is-visible'); }
+function showUpdatePanel(tag) {
+  if (!updatePanel || !tag) return;
+  updateHelp.textContent = `New APK available: ${tag}. Your app: v${APP_VERSION}.`;
+  updatePanel.classList.add('is-visible');
+}
+async function openExternal(url) {
+  if (CapacitorBrowser) await CapacitorBrowser.open({ url });
+  else window.open(url, '_blank', 'noopener,noreferrer');
+}
 function beep(freq = 330, duration = 0.05) {
   if (!soundEnabled) return;
   audioContext ||= new AudioContext();
@@ -62,6 +95,7 @@ function beep(freq = 330, duration = 0.05) {
   osc.start();
   osc.stop(audioContext.currentTime + duration);
 }
+function tap() { Haptics?.impact?.({ style: 'LIGHT' }).catch(() => {}); }
 
 function drawCell(ctx, x, y, size, filled) {
   ctx.fillStyle = filled ? '#142318' : 'rgba(20,35,24,0.11)';
@@ -129,9 +163,10 @@ function loop(time = 0) {
   raf = requestAnimationFrame(loop);
 }
 
-function startGame() { elapsed = 0; finalSavedForRound = false; game.start(); beep(520, 0.08); render(); }
+function startGame() { elapsed = 0; finalSavedForRound = false; game.start(); tap(); beep(520, 0.08); render(); }
 function action(name) {
   if (!game.snapshot().running && name !== 'start') startGame();
+  tap();
   if (name === 'left' && game.move(-1)) beep(260, 0.025);
   if (name === 'right' && game.move(1)) beep(260, 0.025);
   if (name === 'down' && game.move(0, 1)) beep(210, 0.025);
@@ -140,13 +175,32 @@ function action(name) {
   render();
 }
 
+async function checkForUpdates() {
+  const now = Date.now();
+  if (now - Number(memory.lastUpdateCheck || 0) < 6 * 60 * 60 * 1000) {
+    if (hasNewerVersion(memory.latestVersionSeen, APP_VERSION)) showUpdatePanel(memory.latestVersionSeen);
+    return;
+  }
+  try {
+    const res = await fetch(LATEST_RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } });
+    if (!res.ok) return;
+    const data = await res.json();
+    const latestTag = data.tag_name || data.name;
+    memory.lastUpdateCheck = now;
+    memory.latestVersionSeen = latestTag || APP_VERSION;
+    saveMemory();
+    if (hasNewerVersion(latestTag, APP_VERSION)) showUpdatePanel(latestTag);
+  } catch {}
+}
+
 document.querySelectorAll('[data-action]').forEach((btn) => {
   btn.addEventListener('pointerdown', (e) => { e.preventDefault(); action(btn.dataset.action); });
 });
 
 startBtn.addEventListener('click', startGame);
-pauseBtn.addEventListener('click', () => { game.pause(); render(); });
+pauseBtn.addEventListener('click', () => { tap(); game.pause(); render(); });
 soundBtn.addEventListener('click', () => {
+  tap();
   soundEnabled = !soundEnabled;
   memory.sound = soundEnabled;
   localStorage.setItem('pocket-bricks-sound', soundEnabled ? 'on' : 'off');
@@ -154,6 +208,7 @@ soundBtn.addEventListener('click', () => {
   soundBtn.textContent = soundEnabled ? 'SOUND ON' : 'SOUND OFF';
   if (soundEnabled) beep(440, 0.06);
 });
+updateBtn?.addEventListener('click', () => openExternal(RELEASES_URL));
 installBtn?.addEventListener('click', async () => {
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
@@ -162,11 +217,8 @@ installBtn?.addEventListener('click', async () => {
     hideInstallPanel();
     return;
   }
-  if (isIos()) {
-    installHelp.textContent = 'On iPhone: tap Share, then Add to Home Screen.';
-  } else {
-    installHelp.textContent = 'Open the browser menu and choose Install app or Add to Home screen.';
-  }
+  if (isIos()) installHelp.textContent = 'On iPhone: tap Share, then Add to Home Screen.';
+  else installHelp.textContent = 'Open the browser menu and choose Install app or Add to Home screen.';
 });
 
 window.addEventListener('beforeinstallprompt', (event) => {
@@ -187,9 +239,10 @@ window.addEventListener('keydown', (e) => {
   if (map[e.key]) { e.preventDefault(); action(map[e.key]); }
 });
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+if ('serviceWorker' in navigator && !window.Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('./sw.js').catch(() => {});
 if (isIos()) showInstallPanel('iPhone: tap Share, then Add to Home Screen.', 'HOW TO INSTALL');
 soundBtn.textContent = soundEnabled ? 'SOUND ON' : 'SOUND OFF';
 render();
+checkForUpdates();
 raf = requestAnimationFrame(loop);
 window.addEventListener('beforeunload', () => cancelAnimationFrame(raf));
