@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#121212" />
+    <meta name="description" content="Pocket Bricks is an open-source old-phone-style falling-block puzzle game rebuilt for smartphones." />
+    <title>Pocket Bricks</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="phone" aria-label="Pocket Bricks game">
+      <section class="brand-strip" aria-hidden="true">
+        <span>POCKET</span>
+        <span>BRICKS</span>
+      </section>
+
+      <section class="screen-shell" aria-label="Game screen">
+        <div class="lcd">
+          <header class="hud" aria-label="Scoreboard">
+            <div>
+              <span>Score</span>
+              <strong id="score">000000</strong>
+            </div>
+            <div>
+              <span>Best</span>
+              <strong id="best">000000</strong>
+            </div>
+          </header>
+
+          <section class="play-row">
+            <canvas id="board" width="200" height="400" aria-label="Game board"></canvas>
+            <aside class="side-panel" aria-label="Game information">
+              <div class="next-box">
+                <span>Next</span>
+                <canvas id="next" width="72" height="72" aria-label="Next block"></canvas>
+              </div>
+              <div class="mini-stat">
+                <span>Lines</span>
+                <strong id="lines">000</strong>
+              </div>
+              <div class="mini-stat">
+                <span>Level</span>
+                <strong id="level">01</strong>
+              </div>
+            </aside>
+          </section>
+
+          <footer class="status" id="status">Press START</footer>
+        </div>
+      </section>
+
+      <section class="menu-row" aria-label="System controls">
+        <button id="start" type="button">Start</button>
+        <button id="pause" type="button">Pause</button>
+        <button id="sound" type="button" aria-pressed="false">Sound</button>
+      </section>
+
+      <section class="keypad" aria-label="Game controls">
+        <button class="nav rotate" type="button" data-action="rotate">ROT</button>
+        <button class="nav left" type="button" data-action="left">LEFT</button>
+        <button class="nav right" type="button" data-action="right">RIGHT</button>
+        <button class="nav down" type="button" data-action="down">DOWN</button>
+        <button class="drop" type="button" data-action="drop">DROP</button>
+      </section>
+
+      <p class="hint">Arrows / WASD / 4-5-6-8. Space drops. P pauses.</p>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
