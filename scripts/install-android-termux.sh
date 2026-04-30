@@ -49,9 +49,13 @@ TMP_PATH="${APK_PATH}.download"
 rm -f "$TMP_PATH"
 
 if command -v curl >/dev/null 2>&1; then
-  curl -L --fail --progress-bar "$URL" -o "$TMP_PATH" || fail "APK release not found. Ask the maintainer to run the Build Android APK workflow with Publish latest APK enabled."
+  curl -L --fail --progress-bar "$URL" -o "$TMP_PATH" || fail "APK release not found. The maintainer must run Actions > Build Android APK > Run workflow with publish_latest enabled."
 else
-  wget -O "$TMP_PATH" "$URL" || fail "APK release not found. Ask the maintainer to run the Build Android APK workflow with Publish latest APK enabled."
+  wget -O "$TMP_PATH" "$URL" || fail "APK release not found. The maintainer must run Actions > Build Android APK > Run workflow with publish_latest enabled."
+fi
+
+if [ ! -s "$TMP_PATH" ]; then
+  fail "downloaded file is empty. Try again after the APK release is published."
 fi
 
 mv "$TMP_PATH" "$APK_PATH"
