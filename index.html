@@ -1,104 +1,114 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#121212" />
-    <meta name="application-name" content="Pocket Bricks" />
-    <meta name="apple-mobile-web-app-title" content="Pocket Bricks" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="description" content="Pocket Bricks is an open-source old-phone-style falling-block puzzle game rebuilt as a real smartphone APK." />
-    <title>Pocket Bricks</title>
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="./assets/icon.svg" />
-    <link rel="stylesheet" href="./src/styles.css" />
-  </head>
-  <body>
-    <main class="game" aria-label="Pocket Bricks game">
-      <section class="screen-shell">
-        <div class="screen-frame">
-          <div class="screen-head">
-            <div class="hud-card">
-              <span class="hud-label">SCORE</span>
-              <strong id="score">000000</strong>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#050505" />
+  <meta name="description" content="Pocket Bricks is an old-phone inspired falling-block puzzle game for Android and the web." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./src/styles.css" />
+  <title>Pocket Bricks</title>
+</head>
+<body>
+  <main class="game" aria-label="Pocket Bricks game">
+    <button id="settingsBtn" class="settings-trigger" type="button" aria-label="Open settings">SET</button>
+
+    <section class="screen-shell" aria-label="LCD game screen">
+      <div class="screen-frame">
+        <div class="screen-head">
+          <div class="hud-card"><span class="hud-label">Score</span><strong id="score">000000</strong></div>
+          <div class="hud-card"><span class="hud-label">Best</span><strong id="best">000000</strong></div>
+        </div>
+
+        <div class="play-layout">
+          <canvas id="board" width="240" height="480" aria-label="Game board"></canvas>
+          <aside class="side-panel" aria-label="Game statistics">
+            <div>
+              <span class="hud-label">Next</span>
+              <canvas id="next" width="76" height="76" aria-label="Next brick"></canvas>
             </div>
-            <div class="hud-card">
-              <span class="hud-label">BEST</span>
-              <strong id="best">000000</strong>
-            </div>
-          </div>
-
-          <div class="play-layout">
-            <canvas id="board" width="240" height="480" aria-label="Game board"></canvas>
-            <aside class="side-panel" aria-label="Game statistics">
-              <div>
-                <span class="hud-label">NEXT</span>
-                <canvas id="next" width="76" height="76" aria-label="Next brick"></canvas>
-              </div>
-              <div class="stacked-stat">
-                <span class="hud-label">LINES</span>
-                <strong id="lines">000</strong>
-              </div>
-              <div class="stacked-stat">
-                <span class="hud-label">LEVEL</span>
-                <strong id="level">01</strong>
-              </div>
-            </aside>
-          </div>
-
-          <p id="status" class="status" role="status" aria-live="polite">READY — PRESS START</p>
+            <div class="stacked-stat"><span class="hud-label">Lines</span><strong id="lines">000</strong></div>
+            <div class="stacked-stat"><span class="hud-label">Level</span><strong id="level">01</strong></div>
+          </aside>
         </div>
-      </section>
+        <p id="status" class="status">READY — PRESS START</p>
+      </div>
+    </section>
 
-      <section class="memory-strip" aria-label="Local memory">
-        <div class="memory-card">
-          <span>LAST</span>
-          <strong id="lastScore">000000</strong>
+    <section class="memory-strip" aria-label="Local memory">
+      <div class="memory-card"><span>Last</span><strong id="lastScore">000000</strong></div>
+      <div class="memory-card"><span>Plays</span><strong id="gamesPlayed">000</strong></div>
+      <div class="memory-card"><span>Top LV</span><strong id="bestLevel">01</strong></div>
+    </section>
+
+    <section id="updatePanel" class="update-strip" aria-label="Android update notice">
+      <button id="updateBtn" class="install-button" type="button">GET APK</button>
+      <p id="updateHelp" class="install-help">New Android APK available.</p>
+    </section>
+
+    <section class="meta-controls" aria-label="Game controls">
+      <button id="startBtn" class="pill-button" type="button">START</button>
+      <button id="pauseBtn" class="pill-button" type="button">PAUSE</button>
+      <button id="soundBtn" class="pill-button" type="button">SOUND ON</button>
+    </section>
+
+    <section class="keypad" aria-label="Touch keypad">
+      <div class="dpad">
+        <button class="key key-up" data-action="rotate" type="button">ROT</button>
+        <button class="key key-left" data-action="left" type="button">LEFT</button>
+        <button class="key key-right" data-action="right" type="button">RIGHT</button>
+        <button class="key key-down" data-action="down" type="button">DOWN</button>
+      </div>
+      <button class="fire-key" data-action="drop" type="button">DROP</button>
+    </section>
+
+    <p class="help-text">Android APK first. Keyboard: arrows or 4/5/6/8. Space drops. P pauses.</p>
+  </main>
+
+  <aside id="settingsPanel" class="settings-panel" aria-hidden="true" aria-label="Pocket Bricks settings">
+    <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="settings-topline">
+        <div>
+          <span class="hud-label">Pocket</span>
+          <h1 id="settingsTitle">SETTINGS</h1>
         </div>
-        <div class="memory-card">
-          <span>PLAYS</span>
-          <strong id="gamesPlayed">000</strong>
-        </div>
-        <div class="memory-card">
-          <span>TOP LV</span>
-          <strong id="bestLevel">01</strong>
-        </div>
-      </section>
+        <button id="closeSettingsBtn" class="mini-button" type="button" aria-label="Close settings">CLOSE</button>
+      </div>
 
-      <section id="updatePanel" class="install-strip" aria-label="Pocket Bricks updates">
-        <button id="updateBtn" class="install-button" type="button">GET UPDATE</button>
-        <p id="updateHelp" class="install-help">A newer APK is available on GitHub.</p>
-      </section>
+      <label class="setting-row" for="startLevelSelect">
+        <span>START LEVEL</span>
+        <select id="startLevelSelect" aria-label="Start level">
+          <option value="1">01 — slow</option>
+          <option value="2">02</option>
+          <option value="3">03</option>
+          <option value="4">04</option>
+          <option value="5">05</option>
+          <option value="6">06</option>
+          <option value="7">07</option>
+          <option value="8">08</option>
+          <option value="9">09 — fast</option>
+        </select>
+      </label>
 
-      <section id="installPanel" class="install-strip" aria-label="Install Pocket Bricks">
-        <button id="installBtn" class="install-button" type="button">INSTALL APP</button>
-        <p id="installHelp" class="install-help">Install to home screen for full app mode.</p>
-      </section>
+      <div class="settings-memory" aria-label="Saved memory" id="settingsMemory"></div>
 
-      <section class="meta-controls" aria-label="Game controls">
-        <button id="startBtn" class="pill-button" data-action="start" type="button">START</button>
-        <button id="pauseBtn" class="pill-button" data-action="pause" type="button">PAUSE</button>
-        <button id="soundBtn" class="pill-button" type="button">SOUND ON</button>
-      </section>
+      <div class="settings-actions">
+        <button id="apkInstallBtn" class="settings-action" type="button">INSTALL APK</button>
+        <button id="releasesBtn" class="settings-action" type="button">RELEASES</button>
+        <button id="repoBtn" class="settings-action" type="button">SOURCE</button>
+        <button id="webInstallBtn" class="settings-action soft" type="button">WEB OPTION</button>
+        <button id="resetMemoryBtn" class="settings-action danger" type="button">CLEAR MEMORY</button>
+      </div>
 
-      <section class="keypad" aria-label="Touch keypad">
-        <div class="dpad" aria-label="Directional pad">
-          <button class="key key-up" data-action="rotate" type="button" aria-label="Rotate">ROT</button>
-          <button class="key key-left" data-action="left" type="button" aria-label="Move left">LEFT</button>
-          <button class="key key-right" data-action="right" type="button" aria-label="Move right">RIGHT</button>
-          <button class="key key-down" data-action="down" type="button" aria-label="Move down">DOWN</button>
-        </div>
-        <button class="fire-key" data-action="drop" type="button" aria-label="Hard drop">DROP</button>
-      </section>
+      <div class="developer-box">
+        <span>DEVELOPER</span>
+        <strong>Imran Shiundu</strong>
+        <p>Open-source Android APK and web build. The APK can check GitHub Releases and send users to the newest installable file without changing the old-phone game taste.</p>
+      </div>
+    </div>
+  </aside>
 
-      <footer class="help-text">
-        Android APK ready. Keyboard: arrows or 4/5/6/8. Space drops. P pauses.
-      </footer>
-    </main>
-
-    <script type="module" src="./src/app.js"></script>
-  </body>
+  <script type="module" src="./src/app.js"></script>
+</body>
 </html>
