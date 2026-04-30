@@ -11,12 +11,7 @@
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
-    <main class="phone" aria-label="Pocket Bricks game">
-      <section class="brand-strip" aria-hidden="true">
-        <span>POCKET</span>
-        <span>BRICKS</span>
-      </section>
-
+    <main class="game" aria-label="Pocket Bricks game">
       <section class="screen-shell">
         <div class="screen-frame">
           <div class="screen-head">
@@ -49,6 +44,21 @@
           </div>
 
           <p id="status" class="status" role="status" aria-live="polite">READY — PRESS START</p>
+        </div>
+      </section>
+
+      <section class="memory-strip" aria-label="Local memory">
+        <div class="memory-card">
+          <span>LAST</span>
+          <strong id="lastScore">000000</strong>
+        </div>
+        <div class="memory-card">
+          <span>PLAYS</span>
+          <strong id="gamesPlayed">000</strong>
+        </div>
+        <div class="memory-card">
+          <span>TOP LV</span>
+          <strong id="bestLevel">01</strong>
         </div>
       </section>
 
