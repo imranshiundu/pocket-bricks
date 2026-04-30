@@ -1,8 +1,27 @@
 # Install Pocket Bricks on a phone
 
-Pocket Bricks is distributed as a real Android APK. The web demo still exists, but the APK is not the main install path. The goal is simple: download the APK, tap it, install it, and play it from the Android app drawer.
+Pocket Bricks has two public paths:
 
-## Fastest public Android install
+1. **Hosted game** — deploy the web app to Vercel so anyone can open and play it instantly.
+2. **Real Android app** — publish the APK through GitHub Releases so Android users can install it like a normal app.
+
+The web app and APK use the same game code.
+
+## Host it on Vercel
+
+The repo is ready for Vercel. Import the GitHub repo into Vercel and use:
+
+```text
+Install Command: npm install
+Build Command: npm run build
+Output Directory: dist
+```
+
+`vercel.json` already contains these settings, so Vercel should detect them automatically.
+
+After deployment, people can use the hosted app by opening your Vercel URL. On Android Chrome, supported browsers can also show **Install app** or **Add to Home screen**. That creates a browser-installed app shortcut. It is useful, but it is not the same as the APK.
+
+## Fastest public Android APK install
 
 Use this path when a release APK is available.
 
@@ -40,28 +59,39 @@ If Android blocks the install:
 
 ## Maintainer: publish the easy APK release
 
-For the Termux installer and direct APK link to work, the repository needs a release named `android-latest` with this asset:
+The repository has a manual GitHub Action named **Build Android APK**.
 
-```text
-pocket-bricks-debug.apk
-```
+To publish the easy APK:
 
-The current Android workflow already builds `pocket-bricks-debug.apk`. After a successful build, attach that APK to a GitHub Release. For a normal versioned release, push a tag like this from a computer:
+1. Open the repo on GitHub.
+2. Go to **Actions**.
+3. Open **Build Android APK**.
+4. Press **Run workflow**.
+5. Leave `publish_latest` enabled.
+6. Wait for the workflow to pass.
 
-```bash
-git tag v1.1.1
-git push origin v1.1.1
-```
-
-GitHub Actions will build and attach the APK to the version release.
-
-For the easiest public install link, also create or update a release called:
+When it passes, GitHub creates or replaces a release named:
 
 ```text
 android-latest
 ```
 
-Attach the same `pocket-bricks-debug.apk` file there. Then Termux users can install with the script above without needing to browse GitHub Actions artifacts.
+That release contains:
+
+```text
+pocket-bricks-debug.apk
+```
+
+That is the file normal Android users and Termux users should install.
+
+For a versioned release, push a tag like this from a computer:
+
+```bash
+git tag v1.1.2
+git push origin v1.1.2
+```
+
+GitHub Actions will build and attach the APK to the version release.
 
 ## GitHub Actions artifact install
 
@@ -117,30 +147,6 @@ Why not WebSocket updates:
 - GitHub does not provide a simple public WebSocket stream for APK releases.
 - A custom WebSocket server would add cost, tracking risk, and battery drain.
 - GitHub Releases are simpler and safer for an open-source game.
-
-## Web demo install
-
-The web version can still be installed as a browser-based app when GitHub Pages is enabled:
-
-```text
-https://imranshiundu.github.io/pocket-bricks/
-```
-
-### Android browser install
-
-1. Open the live game URL.
-2. Wait for the page to load once.
-3. Tap **INSTALL APP** if the in-game install prompt appears.
-4. If the prompt does not appear, open the browser menu.
-5. Tap **Install app** or **Add to Home screen**.
-
-### iPhone / iPad
-
-1. Open the live game URL in Safari.
-2. Tap the **Share** button.
-3. Tap **Add to Home Screen**.
-4. Keep the name **Pocket Bricks**.
-5. Tap **Add**.
 
 ## Local memory
 
