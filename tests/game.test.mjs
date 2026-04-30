@@ -19,6 +19,22 @@ test('game starts with active piece', () => {
   assert.ok(s.current);
 });
 
+test('game can start from selected old-phone level', () => {
+  const g = new PocketBricksGame({ random: () => 0 });
+  const s = g.start({ startLevel: 5 });
+  assert.equal(s.level, 5);
+  assert.equal(s.startLevel, 5);
+  assert.ok(s.dropInterval < new PocketBricksGame({ random: () => 0 }).start({ startLevel: 1 }).dropInterval);
+});
+
+test('selected level does not drop back after first clear', () => {
+  const g = new PocketBricksGame({ random: () => 1 / 7 });
+  g.start({ startLevel: 4 });
+  g.board[ROWS - 1] = Array(COLS).fill('X');
+  g.lock();
+  assert.equal(g.snapshot().level, 4);
+});
+
 test('piece cannot move through left wall', () => {
   const g = new PocketBricksGame({ random: () => 0 });
   g.start();
