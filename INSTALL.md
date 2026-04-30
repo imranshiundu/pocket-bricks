@@ -1,44 +1,67 @@
 # Install Pocket Bricks on a phone
 
-Pocket Bricks is a Progressive Web App. That means people can install it from the browser without a Play Store listing.
+Pocket Bricks is distributed as a real Android APK. The web demo still exists, but the APK is the main phone install path.
 
-Once GitHub Pages is enabled, open this URL on the phone:
+## Android APK install
+
+The repository builds an APK automatically with GitHub Actions.
+
+1. Open the repository on your phone.
+2. Tap **Actions**.
+3. Open the newest successful **Build Android APK** workflow run.
+4. Download the artifact named `pocket-bricks-debug-apk`.
+5. If Android downloads a ZIP, extract it.
+6. Tap `pocket-bricks-debug.apk`.
+7. Android may ask you to allow installs from the browser or file manager.
+8. Launch **Pocket Bricks** from the app drawer.
+
+This gives the user a real installed app, not just a browser shortcut.
+
+## GitHub Release install path
+
+For a cleaner public install flow, create a GitHub Release and attach the APK there. Then users can install from the latest release assets.
+
+The app has a built-in update notice. When a newer GitHub Release tag exists, it shows **GET UPDATE** inside the game and opens the Releases page.
+
+## Why updates are not WebSocket-based
+
+GitHub does not provide a public WebSocket stream for APK release updates. A custom WebSocket server just for update checks would be unnecessary for this small game.
+
+Pocket Bricks uses a safer lightweight release checker:
+
+- No server to maintain.
+- No user tracking.
+- No background battery drain.
+- No forced updates.
+- Works with normal GitHub Releases.
+
+## Web demo install
+
+The web version can still be installed as a browser-based app when GitHub Pages is enabled:
 
 ```text
 https://imranshiundu.github.io/pocket-bricks/
 ```
 
-## Android
-
-### Chrome / Edge / Brave
+### Android browser install
 
 1. Open the live game URL.
 2. Wait for the page to load once.
 3. Tap **INSTALL APP** if the in-game install prompt appears.
 4. If the prompt does not appear, open the browser menu.
 5. Tap **Install app** or **Add to Home screen**.
-6. Launch **Pocket Bricks** from the phone home screen.
 
-After installation, it opens like a normal app, uses the app icon, hides most browser chrome, and works offline after the first successful load.
-
-## iPhone / iPad
+### iPhone / iPad
 
 1. Open the live game URL in Safari.
 2. Tap the **Share** button.
 3. Tap **Add to Home Screen**.
 4. Keep the name **Pocket Bricks**.
 5. Tap **Add**.
-6. Launch it from the home screen.
-
-On iOS, Safari controls the install flow. The web app still saves memory locally and can run from the home screen.
-
-## Offline play
-
-The game has a service worker. After the first online visit, the app shell is cached locally. A player can reopen it later without internet, as long as the browser has not cleared site storage.
 
 ## Local memory
 
-The app stores only game memory in the browser:
+The app stores only game memory on the device:
 
 - Best score.
 - Last score.
@@ -46,15 +69,6 @@ The app stores only game memory in the browser:
 - Best level.
 - Best lines.
 - Sound preference.
+- Last update check state.
 
 There is no account system, backend, analytics, tracking, ads, or cloud sync.
-
-## Play Store path later
-
-A Play Store release is possible later by wrapping the PWA with Trusted Web Activity or by building a small native wrapper. For now, the cleanest open-source distribution is:
-
-1. Public GitHub repository.
-2. GitHub Pages live app.
-3. Install from browser to home screen.
-
-This keeps the project lightweight and avoids store fees, review delays, and unnecessary native complexity.
